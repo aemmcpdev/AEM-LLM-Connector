@@ -47,10 +47,10 @@ import java.util.zip.ZipOutputStream;
  */
 @Component(
     service = Servlet.class,
+    immediate = true,
     property = {
         "sling.servlet.methods=" + HttpConstants.METHOD_GET,
-        "sling.servlet.paths=/bin/surge/llm/generate",
-        "sling.servlet.extensions=json,zip"
+        "sling.servlet.paths=/bin/surge/llm/generate"
     }
 )
 public class ComponentGeneratorServlet extends SlingSafeMethodsServlet {

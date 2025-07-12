@@ -16,15 +16,13 @@
 package com.surgesoftware.aem.llm.core.services.impl;
 
 import com.surgesoftware.aem.llm.core.services.OpenAIService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import org.apache.sling.commons.json.JSONObject;
+import org.apache.sling.commons.json.JSONArray;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.slf4j.Logger;
@@ -53,10 +51,10 @@ public class OpenAIServiceImpl implements OpenAIService {
     private static final Logger LOG = LoggerFactory.getLogger(OpenAIServiceImpl.class);
     
     // TODO: Move to OSGi configuration
-    private static final String OPENAI_API_KEY = "your-openai-api-key-here";
+    private static final String OPENAI_API_KEY = "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";
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
     
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    // Using Sling JSON instead of Jackson
     
     @Override
     public Map<String, String> generateComponentFiles(String componentType, String requirements) {
@@ -121,46 +119,72 @@ public class OpenAIServiceImpl implements OpenAIService {
     }
     
     private String callOpenAI(String prompt) throws IOException {
-        HttpClient httpClient = HttpClientBuilder.create().build();
-        HttpPost request = new HttpPost(OPENAI_API_URL);
-        
-        // Set headers
-        request.setHeader("Authorization", "Bearer " + OPENAI_API_KEY);
-        request.setHeader("Content-Type", "application/json");
-        
-        // Build request body
-        String requestBody = String.format(
-            "{\n" +
-            "    \"model\": \"gpt-4\",\n" +
-            "    \"messages\": [\n" +
-            "        {\n" +
-            "            \"role\": \"system\",\n" +
-            "            \"content\": \"You are an expert AEM developer working for SURGE Software Solutions. Generate clean, production-ready AEM component files following Adobe best practices.\"\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"role\": \"user\",\n" +
-            "            \"content\": \"%s\"\n" +
-            "        }\n" +
-            "    ],\n" +
-            "    \"max_tokens\": 2000,\n" +
-            "    \"temperature\": 0.7\n" +
-            "}", prompt.replace("\"", "\\\""));
-        
-        request.setEntity(new StringEntity(requestBody, StandardCharsets.UTF_8));
-        
-        HttpResponse response = httpClient.execute(request);
-        HttpEntity entity = response.getEntity();
-        
-        if (entity != null) {
-            String responseBody = EntityUtils.toString(entity, StandardCharsets.UTF_8);
-            JsonNode jsonNode = objectMapper.readTree(responseBody);
+        try {
+            URL url = new URL(OPENAI_API_URL);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             
-            if (jsonNode.has("choices") && jsonNode.get("choices").size() > 0) {
-                JsonNode choice = jsonNode.get("choices").get(0);
-                if (choice.has("message") && choice.get("message").has("content")) {
-                    return choice.get("message").get("content").asText();
+            // Set request method and headers
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Authorization", "Bearer " + OPENAI_API_KEY);
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+            
+            // Build request body using Sling JSON
+            JSONObject requestJson = new JSONObject();
+            requestJson.put("model", "gpt-4");
+            requestJson.put("max_tokens", 2000);
+            requestJson.put("temperature", 0.7);
+            
+            JSONArray messages = new JSONArray();
+            
+            JSONObject systemMessage = new JSONObject();
+            systemMessage.put("role", "system");
+            systemMessage.put("content", "You are an expert AEM developer working for SURGE Software Solutions. Generate clean, production-ready AEM component files following Adobe best practices.");
+            messages.put(systemMessage);
+            
+            JSONObject userMessage = new JSONObject();
+            userMessage.put("role", "user");
+            userMessage.put("content", prompt);
+            messages.put(userMessage);
+            
+            requestJson.put("messages", messages);
+            
+            // Send request
+            OutputStream outputStream = connection.getOutputStream();
+            outputStream.write(requestJson.toString().getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+            outputStream.close();
+            
+            // Read response
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+                
+                // Parse response using Sling JSON
+                JSONObject responseJson = new JSONObject(response.toString());
+                if (responseJson.has("choices")) {
+                    JSONArray choices = responseJson.getJSONArray("choices");
+                    if (choices.length() > 0) {
+                        JSONObject choice = choices.getJSONObject(0);
+                        if (choice.has("message")) {
+                            JSONObject message = choice.getJSONObject("message");
+                            if (message.has("content")) {
+                                return message.getString("content");
+                            }
+                        }
+                    }
                 }
             }
+            
+            connection.disconnect();
+        } catch (Exception e) {
+            LOG.error("Error calling OpenAI API: {}", e.getMessage(), e);
         }
         
         return null;

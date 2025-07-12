@@ -20,8 +20,8 @@
         <!-- Servlet API -->
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
             <scope>provided</scope>
         </dependency>
         
@@ -48,21 +48,12 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         
-        <!-- JSON Processing -->
+        <!-- JSON Processing - Using built-in AEM JSON -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        
-        <!-- HTTP Client for OpenAI API -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.commons.json</artifactId>
+            <version>2.0.20</version>
+            <scope>provided</scope>
         </dependency>
         
         <!-- Testing -->
@@ -98,8 +89,17 @@
                             com.surgesoftware.aem.llm.core.utils
                         </Private-Package>
                         <Import-Package>
-                            javax.annotation;version=0.0.0,
-                            *
+                            javax.servlet;version="[2.5,4)",
+                            javax.servlet.http;version="[2.5,4)",
+                            org.apache.sling.api;version="[2.0,3)",
+                            org.apache.sling.api.servlets;version="[2.0,3)",
+                            org.slf4j;version="[1.5,2)",
+                            org.apache.sling.commons.json;version="[2.0,3)",
+                            java.net,
+                            java.io,
+                            java.util,
+                            java.util.zip,
+                            *;resolution:=optional
                         </Import-Package>
                     </instructions>
                 </configuration>
