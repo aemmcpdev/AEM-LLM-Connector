@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>com.surgesoftware.aem</groupId>
+        <artifactId>surge-aem-llm-connector</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    
+    <artifactId>surge-aem-llm-connector.ui.content</artifactId>
+    <packaging>content-package</packaging>
+    
+    <name>SURGE AEM LLM Connector - UI Content</name>
+    <description>UI Content package for SURGE AEM LLM Connector</description>
+    
+    <build>
+        <sourceDirectory>src/main/content/jcr_root</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <includeEmptyDirs>true</includeEmptyDirs>
+                </configuration>
+            </plugin>
+            
+            <plugin>
+                <groupId>com.day.jcr.vault</groupId>
+                <artifactId>content-package-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
+                    <verbose>true</verbose>
+                    <failOnError>true</failOnError>
+                    <group>SURGE Software Solutions</group>
+                    <properties>
+                        <createdBy>SURGE AEM LLM Connector</createdBy>
+                        <description>SURGE AEM LLM Connector UI Content Package</description>
+                    </properties>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project> 

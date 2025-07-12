@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>com.surgesoftware.aem</groupId>
+        <artifactId>surge-aem-llm-connector</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    
+    <artifactId>surge-aem-llm-connector.all</artifactId>
+    <packaging>content-package</packaging>
+    
+    <name>SURGE AEM LLM Connector - All</name>
+    <description>Complete deployment package for SURGE AEM LLM Connector</description>
+    
+    <dependencies>
+        <dependency>
+            <groupId>com.surgesoftware.aem</groupId>
+            <artifactId>surge-aem-llm-connector.core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.surgesoftware.aem</groupId>
+            <artifactId>surge-aem-llm-connector.ui.apps</artifactId>
+            <version>${project.version}</version>
+            <type>content-package</type>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.surgesoftware.aem</groupId>
+            <artifactId>surge-aem-llm-connector.ui.content</artifactId>
+            <version>${project.version}</version>
+            <type>content-package</type>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.day.jcr.vault</groupId>
+                <artifactId>content-package-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
+                    <verbose>true</verbose>
+                    <failOnError>true</failOnError>
+                    <group>SURGE Software Solutions</group>
+                    <name>surge-aem-llm-connector</name>
+                    <properties>
+                        <createdBy>SURGE AEM LLM Connector</createdBy>
+                        <description>SURGE AEM LLM Connector - Complete Package</description>
+                    </properties>
+                    <embeddedTarget>/apps/surge-aem-llm-connector/install</embeddedTarget>
+                    <embeddeds>
+                        <embedded>
+                            <groupId>com.surgesoftware.aem</groupId>
+                            <artifactId>surge-aem-llm-connector.core</artifactId>
+                            <target>/apps/surge-aem-llm-connector/install</target>
+                        </embedded>
+                    </embeddeds>
+                    <subPackages>
+                        <subPackage>
+                            <groupId>com.surgesoftware.aem</groupId>
+                            <artifactId>surge-aem-llm-connector.ui.apps</artifactId>
+                            <filter>true</filter>
+                        </subPackage>
+                        <subPackage>
+                            <groupId>com.surgesoftware.aem</groupId>
+                            <artifactId>surge-aem-llm-connector.ui.content</artifactId>
+                            <filter>true</filter>
+                        </subPackage>
+                    </subPackages>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project> 
