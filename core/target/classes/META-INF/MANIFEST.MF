@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1752396748202
+Bnd-LastModified: 1752397370948
 Build-Jdk: 11.0.18
 Built-By: ADMIN
 Bundle-Description: Core OSGi bundle for SURGE AEM LLM Connector contain
@@ -15,16 +15,19 @@ Export-Package: com.surgesoftware.aem.llm.core.services;version="1.0.0.S
  NAPSHOT",com.surgesoftware.aem.llm.core.models;version="1.0.0.SNAPSHOT"
 Import-Package: javax.servlet;version="[2.5,4)",org.apache.sling.api;ver
  sion="[2.0,3)",org.apache.sling.api.servlets;version="[2.0,3)",org.slf4
- j;version="[1.5,2)",com.surgesoftware.aem.llm.core.services;resolution:
- =optional,javax.servlet.http;version="[2.5,4)",org.apache.sling.commons
- .json;version="[2.0,3)",java.net,java.io,java.util,java.util.zip,java.n
+ j;version="[1.5,2)",org.apache.sling.commons.json;version="[2.0,3)",com
+ .surgesoftware.aem.llm.core.services;resolution:=optional,javax.servlet
+ .http;version="[2.5,4)",java.net,java.io,java.util,java.util.zip,java.n
  io.charset
-Provide-Capability: osgi.service;objectClass:List<String>="javax.servlet
+Provide-Capability: osgi.service;objectClass:List<String>="com.surgesoft
+ ware.aem.llm.core.services.OpenAIService";uses:="com.surgesoftware.aem.
+ llm.core.services",osgi.service;objectClass:List<String>="javax.servlet
  .Servlet";uses:="javax.servlet"
 Require-Capability: osgi.service;filter:="(objectClass=com.surgesoftware
  .aem.llm.core.services.OpenAIService)";effective:=active,osgi.extender;
  filter:="(&(osgi.extender=osgi.component)(version>=1.4.0)(!(version>=2.
  0.0)))",osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=11))"
-Service-Component: OSGI-INF/com.surgesoftware.aem.llm.core.servlets.Comp
- onentGeneratorServlet.xml
+Service-Component: OSGI-INF/com.surgesoftware.aem.llm.core.services.impl
+ .OpenAIServiceImpl.xml,OSGI-INF/com.surgesoftware.aem.llm.core.servlets
+ .ComponentGeneratorServlet.xml
 Tool: Bnd-5.1.1.202006162103

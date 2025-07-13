@@ -124,6 +124,7 @@
                         </Export-Package>
                         <Private-Package>
                             com.surgesoftware.aem.llm.core.servlets,
+                            com.surgesoftware.aem.llm.core.services.impl,
                             com.surgesoftware.aem.llm.core.utils
                         </Private-Package>
                         <Import-Package>
@@ -140,6 +141,8 @@
                             java.nio.charset,
                             *;resolution:=optional
                         </Import-Package>
+                        <_dsannotations>*</_dsannotations>
+                        <_metatypeannotations>*</_metatypeannotations>
 
                     </instructions>
                 </configuration>

@@ -1,3 +1,4 @@
 com\surgesoftware\aem\llm\core\services\OpenAIService.class
 com\surgesoftware\aem\llm\core\servlets\ComponentGeneratorServlet.class
 com\surgesoftware\aem\llm\core\services\impl\OpenAIServiceImpl.class
+com\surgesoftware\aem\llm\core\services\OpenAIConfiguration.class

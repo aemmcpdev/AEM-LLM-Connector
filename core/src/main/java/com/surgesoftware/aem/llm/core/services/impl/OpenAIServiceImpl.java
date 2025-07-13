@@ -16,6 +16,7 @@
 package com.surgesoftware.aem.llm.core.services.impl;
 
 import com.surgesoftware.aem.llm.core.services.OpenAIService;
+import com.surgesoftware.aem.llm.core.services.OpenAIConfiguration;
 import org.apache.sling.commons.json.JSONObject;
 import org.apache.sling.commons.json.JSONArray;
 import java.net.HttpURLConnection;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.metatype.annotations.Designate;
 
 /**
  * OpenAI Service Implementation for SURGE AEM LLM Connector
@@ -46,19 +48,35 @@ import org.osgi.service.component.annotations.Activate;
         "service.description=SURGE AEM LLM Connector - OpenAI Service",
         "service.vendor=SURGE Software Solutions Private Limited"
     })
+@Designate(ocd = OpenAIConfiguration.class)
 public class OpenAIServiceImpl implements OpenAIService {
     
     private static final Logger LOG = LoggerFactory.getLogger(OpenAIServiceImpl.class);
     
-    // TODO: Move to OSGi configuration
-    private static final String OPENAI_API_KEY = "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";
-    private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+    private OpenAIConfiguration config;
+    private boolean serviceEnabled = false;
     
     @Activate
-    protected void activate() {
-        LOG.info("SURGE AEM LLM Connector: OpenAI Service activated successfully");
-        LOG.info("OpenAI API URL: {}", OPENAI_API_URL);
-        LOG.info("OpenAI Service ready to generate AEM component files");
+    protected void activate(OpenAIConfiguration configuration) {
+        this.config = configuration;
+        
+        LOG.info("SURGE AEM LLM Connector: OpenAI Service activating...");
+        
+        if (configuration.enabled()) {
+            if (configuration.apiKey() != null && !configuration.apiKey().trim().isEmpty()) {
+                this.serviceEnabled = true;
+                LOG.info("OpenAI API URL: {}", configuration.apiUrl());
+                LOG.info("OpenAI Model: {}", configuration.model());
+                LOG.info("SURGE AEM LLM Connector: OpenAI Service activated successfully");
+            } else {
+                this.serviceEnabled = false;
+                LOG.warn("OpenAI API key is not configured. Service will be disabled.");
+                LOG.warn("Please configure the API key in OSGi configuration: 'SURGE AEM LLM Connector - OpenAI Configuration'");
+            }
+        } else {
+            this.serviceEnabled = false;
+            LOG.info("OpenAI Service is disabled in configuration");
+        }
     }
     
     // Using Sling JSON instead of Jackson
@@ -66,6 +84,11 @@ public class OpenAIServiceImpl implements OpenAIService {
     @Override
     public Map<String, String> generateComponentFiles(String componentType, String requirements) {
         LOG.info("Generating {} component files for SURGE AEM LLM Connector", componentType);
+        
+        if (!serviceEnabled) {
+            LOG.info("OpenAI service not available, using default templates for {} component", componentType);
+            return getDefaultComponentFiles(componentType);
+        }
         
         Map<String, String> files = new HashMap<>();
         
@@ -89,6 +112,11 @@ public class OpenAIServiceImpl implements OpenAIService {
     public String generateComponentFile(String componentType, String fileType, String requirements) {
         LOG.debug("Generating {} file for {} component", fileType, componentType);
         
+        if (!serviceEnabled) {
+            LOG.debug("OpenAI service not available, using default template for {} {} file", componentType, fileType);
+            return getDefaultFileContent(componentType, fileType);
+        }
+        
         try {
             String prompt = buildPrompt(componentType, fileType, requirements);
             String response = callOpenAI(prompt);
@@ -111,6 +139,11 @@ public class OpenAIServiceImpl implements OpenAIService {
     public boolean testConnection() {
         LOG.info("Testing OpenAI API connection for SURGE AEM LLM Connector");
         
+        if (!serviceEnabled) {
+            LOG.warn("OpenAI service is not enabled or configured properly");
+            return false;
+        }
+        
         try {
             String testPrompt = "Generate a simple test response for AEM component generation.";
             String response = callOpenAI(testPrompt);
@@ -126,21 +159,26 @@ public class OpenAIServiceImpl implements OpenAIService {
     }
     
     private String callOpenAI(String prompt) throws IOException {
+        if (!serviceEnabled || config == null) {
+            LOG.warn("OpenAI service is not configured or enabled");
+            return null;
+        }
+        
         try {
-            URL url = new URL(OPENAI_API_URL);
+            URL url = new URL(config.apiUrl());
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             
             // Set request method and headers
             connection.setRequestMethod("POST");
-            connection.setRequestProperty("Authorization", "Bearer " + OPENAI_API_KEY);
+            connection.setRequestProperty("Authorization", "Bearer " + config.apiKey());
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setDoOutput(true);
             
             // Build request body using Sling JSON
             JSONObject requestJson = new JSONObject();
-            requestJson.put("model", "gpt-4");
-            requestJson.put("max_tokens", 2000);
-            requestJson.put("temperature", 0.7);
+            requestJson.put("model", config.model());
+            requestJson.put("max_tokens", config.maxTokens());
+            requestJson.put("temperature", config.temperature());
             
             JSONArray messages = new JSONArray();
             
