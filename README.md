@@ -178,22 +178,59 @@ The connector supports the following configurations:
 - **AEM Server URL**: Configured in Maven profiles
 - **Component Generation Parameters**: Customizable via service parameters
 
-## Roadmap
+## 🚧 Roadmap & Vision
 
-### Phase 1 (Current)
-- ✅ Text component generation
-- ✅ Basic OpenAI integration
-- ✅ ZIP/JSON output formats
+This project is just the beginning. The goal is to empower AEM developers to shift from traditional coding to prompt-driven development, covering up to 80% of project development — all through natural language instructions.
 
-### Phase 2 (Upcoming)
-- 🔄 Header component generation
-- 🔄 Title component generation
-- 🔄 Banner component generation
+### ✅ Current Features (MVP)
 
-### Phase 3 (Future)
-- 🔄 Advanced component types
-- 🔄 Custom styling options
-- 🔄 Template variations
+- 📦 **Local AEM package installation**
+- 🧠 **Prompt-based component generation using LLM**  
+  _e.g., "Create a banner component"_
+- 🖥️ **Live preview of generated components in the same UI**
+- 📁 **Auto-generated backend files + HTL structure**
+
+### 🛣️ Coming Soon
+
+1. **Conversational Prompt Refinement**
+   - Iteratively refine the UI or behavior of the generated component by continuing the conversation
+   - _Example:_
+     - "Make the banner full width"
+     - "Add CTA button with link"
+     - "Change background to gradient blue"
+
+2. **Multi-Model Support**
+   - Choose between OpenAI, Claude, Gemini, or custom LLMs
+   - Easily switch between models to compare performance and responses
+
+3. **Sign-in Based LLM Access**
+   - Users can sign in with Google/GitHub/email
+   - API key is auto-configured — no manual setup required
+   - Personalized model configuration and usage stats per user
+
+4. **Expand Beyond Components**
+   - Prompt-based creation for:
+     - 🧱 Templates
+     - 📄 Content Fragments
+     - 🎞️ Experience Fragments
+     - 🧩 Page policies and editable templates
+   - The aim is to cover most AEM authoring and development use cases via LLMs
+
+5. **Component Library + Save/Reuse**
+   - Save components as reusable blueprints
+   - Re-invoke previous components and apply changes via new prompts
+
+6. **Real-Time Project Sync (Optional)**
+   - Push generated components directly to GitHub via PR
+   - Preview sandbox instances for QA testing
+
+---
+
+### 🎯 Vision: Prompt-First AEM Development
+
+Shift from manual AEM development to prompt-first development — allowing architects, designers, and developers to build entire page structures, content models, and components with conversational instructions.
+
+This tool aims to be your developer copilot inside AEM — not just generating code, but transforming how AEM projects are built, reviewed, and delivered.
 
 ## Contributing
 
