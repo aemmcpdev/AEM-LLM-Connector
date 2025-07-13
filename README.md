@@ -62,7 +62,7 @@ The connector consists of:
 Once deployed, the connector provides a REST endpoint at:
 
 ```
-http://localhost:4502/bin/surge/llm/generate
+http://localhost:4502/content/aem-llm/generate
 ```
 
 #### Parameters
@@ -75,17 +75,17 @@ http://localhost:4502/bin/surge/llm/generate
 
 1. **Generate a text component (ZIP format)**:
    ```
-   http://localhost:4502/bin/surge/llm/generate?type=text
+   http://localhost:4502/content/aem-llm/generate?type=text
    ```
 
 2. **Generate with requirements (JSON format)**:
    ```
-   http://localhost:4502/bin/surge/llm/generate?type=text&requirements=Add%20rich%20text%20support&format=json
+   http://localhost:4502/content/aem-llm/generate?type=text&requirements=Add%20rich%20text%20support&format=json
    ```
 
 3. **Generate with custom specifications**:
    ```
-   http://localhost:4502/bin/surge/llm/generate?type=text&requirements=Include%20character%20count%20and%20validation
+   http://localhost:4502/content/aem-llm/generate?type=text&requirements=Include%20character%20count%20and%20validation
    ```
 
 ## Generated Files

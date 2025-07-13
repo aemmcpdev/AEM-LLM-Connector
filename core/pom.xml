@@ -120,7 +120,8 @@
                         <Bundle-Vendor>SURGE Software Solutions Private Limited</Bundle-Vendor>
                         <Export-Package>
                             com.surgesoftware.aem.llm.core.services,
-                            com.surgesoftware.aem.llm.core.models
+                            com.surgesoftware.aem.llm.core.models,
+                            com.surgesoftware.aem.llm.core.config
                         </Export-Package>
                         <Private-Package>
                             com.surgesoftware.aem.llm.core.servlets,
@@ -160,7 +161,7 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.sling</groupId>
-                        <artifactId>maven-sling-plugin</artifactId>
+                        <artifactId>sling-maven-plugin</artifactId>
                         <version>2.4.0</version>
                         <executions>
                             <execution>

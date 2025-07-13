@@ -16,6 +16,7 @@
 package com.surgesoftware.aem.llm.core.servlets;
 
 import com.surgesoftware.aem.llm.core.services.OpenAIService;
+import com.surgesoftware.aem.llm.core.services.FileManagementService;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.HttpConstants;
@@ -25,14 +26,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-import javax.jcr.Session;
-import org.apache.sling.api.resource.ResourceResolver;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Locale;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.Activate;
@@ -50,10 +50,12 @@ import org.osgi.service.component.annotations.Activate;
  */
 @Component(service = Servlet.class,
     property = {
-        "sling.servlet.paths=/bin/surge/llm/generate",
+        "sling.servlet.paths=/bin/aem-llm/generate",
         "sling.servlet.methods=" + HttpConstants.METHOD_GET,
         "sling.servlet.methods=" + HttpConstants.METHOD_POST,
-        "sling.auth.requirements=-/bin/surge/llm/generate",
+        "sling.servlet.methods=" + HttpConstants.METHOD_OPTIONS,
+        "sling.auth.requirements=-/bin/aem-llm/generate",
+        "sling.auth.requirements=-/bin/aem-llm/*",
         "service.description=SURGE AEM LLM Connector - Component Generator Servlet",
         "service.vendor=SURGE Software Solutions Private Limited"
     })
@@ -65,22 +67,41 @@ public class ComponentGeneratorServlet extends SlingAllMethodsServlet {
     @Reference
     private OpenAIService openAIService;
     
+    @Reference
+    private FileManagementService fileManagementService;
+    
     @Activate
     protected void activate() {
         LOG.info("SURGE AEM LLM Connector: ComponentGeneratorServlet activated successfully");
-        LOG.info("Servlet registered at path: /bin/surge/llm/generate");
+        LOG.info("Servlet registered at path: /bin/aem-llm/generate");
     }
     
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
+        addCORSHeaders(response);
         processRequest(request, response);
     }
     
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
+        addCORSHeaders(response);
         processRequest(request, response);
+    }
+    
+    @Override
+    protected void doOptions(SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws ServletException, IOException {
+        addCORSHeaders(response);
+        response.setStatus(200);
+    }
+    
+    private void addCORSHeaders(SlingHttpServletResponse response) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type, CSRF-Token, Authorization");
+        response.setHeader("Access-Control-Max-Age", "3600");
     }
     
     private void processRequest(SlingHttpServletRequest request, SlingHttpServletResponse response)
@@ -97,164 +118,145 @@ public class ComponentGeneratorServlet extends SlingAllMethodsServlet {
         }
         
         try {
-            // Check if OpenAI service is available
-            if (openAIService == null) {
-                LOG.error("OpenAI service is not available");
+            // Check if services are available
+            if (openAIService == null || fileManagementService == null) {
+                LOG.error("Required services are not available");
                 response.setStatus(503);
                 response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"OpenAI service not available\", \"status\": \"service_unavailable\"}");
+                response.getWriter().write("{\"error\": \"Required services not available\", \"status\": \"service_unavailable\"}");
                 return;
             }
             
             // Get request parameters
-            String componentType = request.getParameter("type");
-            String requirements = request.getParameter("requirements");
-            String format = request.getParameter("format");
-            
-            // Validate component type
-            if (componentType == null || componentType.isEmpty()) {
-                componentType = "text"; // Default to text component
-            }
-            
-            // Validate format
-            if (format == null || format.isEmpty()) {
-                format = "zip"; // Default to zip format
-            }
-            
-            LOG.info("Generating {} component with format: {}", componentType, format);
-            
-            // Generate component files using OpenAI service
-            Map<String, String> componentFiles = openAIService.generateComponentFiles(componentType, requirements);
-            
-            if (componentFiles == null || componentFiles.isEmpty()) {
-                LOG.error("Failed to generate component files for type: {}", componentType);
-                response.setStatus(500);
-                response.getWriter().write("{\"error\": \"Failed to generate component files\"}");
+            String prompt = request.getParameter("prompt");
+            if (prompt == null || prompt.isEmpty()) {
+                response.setStatus(400);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Missing prompt parameter\", \"status\": \"bad_request\"}");
                 return;
             }
             
-            // Return files based on requested format
-            if ("json".equalsIgnoreCase(format)) {
-                sendJsonResponse(response, componentFiles, componentType);
-            } else {
-                sendZipResponse(response, componentFiles, componentType);
+            // Generate timestamp for this request
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS"));
+            
+            LOG.info("Processing prompt: '{}' with timestamp: {}", prompt, timestamp);
+            
+            // Generate component files using OpenAI service
+            Map<String, String> componentFiles = openAIService.generateComponentFiles("component", prompt);
+            
+            if (componentFiles == null || componentFiles.isEmpty()) {
+                LOG.error("Failed to generate component files for prompt: {}", prompt);
+                response.setStatus(500);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Failed to generate component files\", \"status\": \"generation_failed\"}");
+                return;
             }
             
-            LOG.info("Successfully generated and sent {} component files", componentType);
+            LOG.info("Generated {} component files: {}", componentFiles.size(), componentFiles.keySet());
+            
+            // Save component files to repository
+            String savedPath = fileManagementService.saveComponentFiles(componentFiles, timestamp);
+            LOG.info("savedPath: {}", savedPath);
+            
+            // Create ZIP file for download
+            String zipPath = fileManagementService.createZipFile(componentFiles, timestamp);
+            LOG.info("zipPath: {}", zipPath);
+            
+            // Extract HTML content for preview (look for .html files)
+            String htmlContent = extractHtmlContent(componentFiles);
+            LOG.info("extractedHtmlContent: {}", htmlContent != null ? "Found HTML content (" + htmlContent.length() + " chars)" : "No HTML content");
+            String previewPath = null;
+            if (htmlContent != null) {
+                previewPath = fileManagementService.savePreviewFile(htmlContent, timestamp);
+                LOG.info("previewPath: {}", previewPath);
+            }
+            
+            // Generate URLs
+            String downloadUrl = fileManagementService.getDownloadUrl(zipPath);
+            String previewUrl = fileManagementService.getPreviewUrl(previewPath);
+            LOG.info("downloadUrl: {}, previewUrl: {}", downloadUrl, previewUrl);
+            
+            // Return JSON response with URLs
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            
+            PrintWriter writer = response.getWriter();
+            writer.write("{\n");
+            writer.write("  \"status\": \"success\",\n");
+            writer.write("  \"message\": \"Component files generated successfully\",\n");
+            writer.write("  \"timestamp\": \"" + formatTimestamp(timestamp) + "\",\n");
+            writer.write("  \"prompt\": \"" + escapeJsonString(prompt) + "\",\n");
+            writer.write("  \"filesGenerated\": " + componentFiles.size() + ",\n");
+            writer.write("  \"downloadUrl\": \"" + (downloadUrl != null ? downloadUrl : "") + "\",\n");
+            writer.write("  \"previewUrl\": \"" + (previewUrl != null ? previewUrl : "") + "\",\n");
+            writer.write("  \"savedPath\": \"" + (savedPath != null ? savedPath : "") + "\",\n");
+            writer.write("  \"generatedBy\": \"SURGE AEM LLM Connector\"\n");
+            writer.write("}");
+            writer.flush();
+            
+            LOG.info("Successfully generated component files for prompt: '{}', timestamp: {}", prompt, timestamp);
             
         } catch (Exception e) {
             LOG.error("Error in ComponentGeneratorServlet: {}", e.getMessage(), e);
             response.setStatus(500);
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Internal server error: " + e.getMessage() + "\"}");
+            response.getWriter().write("{\"error\": \"Internal server error: " + e.getMessage() + "\", \"status\": \"server_error\"}");
         }
     }
     
-    private void sendJsonResponse(SlingHttpServletResponse response, Map<String, String> files, String componentType) 
-            throws IOException {
-        
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        
-        PrintWriter writer = response.getWriter();
-        writer.write("{\n");
-        writer.write("  \"componentType\": \"" + componentType + "\",\n");
-        writer.write("  \"generatedBy\": \"SURGE AEM LLM Connector\",\n");
-        writer.write("  \"timestamp\": \"" + System.currentTimeMillis() + "\",\n");
-        writer.write("  \"files\": {\n");
-        
-        int count = 0;
-        for (Map.Entry<String, String> entry : files.entrySet()) {
-            if (count > 0) {
-                writer.write(",\n");
+    private String extractHtmlContent(Map<String, String> componentFiles) {
+        // Look for HTML files in the generated components
+        for (Map.Entry<String, String> entry : componentFiles.entrySet()) {
+            String fileName = entry.getKey();
+            if (fileName.endsWith(".html") || fileName.endsWith(".htm")) {
+                return entry.getValue();
             }
-            writer.write("    \"" + entry.getKey() + "\": " + escapeJsonString(entry.getValue()));
-            count++;
         }
         
-        writer.write("\n  }\n");
-        writer.write("}");
-        writer.flush();
-    }
-    
-    private void sendZipResponse(SlingHttpServletResponse response, Map<String, String> files, String componentType) 
-            throws IOException {
-        
-        response.setContentType("application/zip");
-        response.setHeader("Content-Disposition", 
-            "attachment; filename=\"" + componentType + "-component-" + System.currentTimeMillis() + ".zip\"");
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ZipOutputStream zos = new ZipOutputStream(baos);
-        
-        // Add a README file
-        ZipEntry readmeEntry = new ZipEntry("README.md");
-        zos.putNextEntry(readmeEntry);
-        String readme = createReadmeContent(componentType);
-        zos.write(readme.getBytes("UTF-8"));
-        zos.closeEntry();
-        
-        // Add component files
-        for (Map.Entry<String, String> entry : files.entrySet()) {
-            ZipEntry zipEntry = new ZipEntry(componentType + "/" + entry.getKey());
-            zos.putNextEntry(zipEntry);
-            zos.write(entry.getValue().getBytes("UTF-8"));
-            zos.closeEntry();
+        // If no HTML file found, create a simple preview from the first file
+        if (!componentFiles.isEmpty()) {
+            Map.Entry<String, String> firstEntry = componentFiles.entrySet().iterator().next();
+            return "<h2>File: " + firstEntry.getKey() + "</h2>\n" +
+                   "<pre><code>" + escapeHtml(firstEntry.getValue()) + "</code></pre>";
         }
         
-        zos.close();
-        
-        byte[] zipData = baos.toByteArray();
-        response.setContentLength(zipData.length);
-        response.getOutputStream().write(zipData);
-        response.getOutputStream().flush();
+        return null;
     }
     
-    private String createReadmeContent(String componentType) {
-        return String.format(
-            "# %s Component\n\n" +
-            "Generated by **SURGE AEM LLM Connector**\n\n" +
-            "## About SURGE Software Solutions Private Limited\n\n" +
-            "This component was generated using SURGE's AEM LLM Connector, an innovative solution that bridges the gap between AEM developers and AI-powered development tools.\n\n" +
-            "## Installation Instructions\n\n" +
-            "1. Copy the `%s` folder to your AEM project's components directory\n" +
-            "2. Update your project's component group if needed\n" +
-            "3. Install the component files in your AEM instance\n" +
-            "4. The component will be available in the component browser\n\n" +
-            "## Files Included\n\n" +
-            "- `dialog.xml` - Component dialog configuration\n" +
-            "- `%s.html` - Component HTML template\n" +
-            "- `%s.js` - Component JavaScript logic\n" +
-            "- `.content.xml` - Component metadata\n\n" +
-            "## Generated Information\n\n" +
-            "- **Component Type**: %s\n" +
-            "- **Generated On**: %s\n" +
-            "- **Generated By**: SURGE AEM LLM Connector v1.0.0\n" +
-            "- **Powered By**: OpenAI ChatGPT-4\n\n" +
-            "## Support\n\n" +
-            "For support and more information about SURGE Software Solutions:\n" +
-            "- Website: https://surgesoftware.com\n" +
-            "- Email: support@surgesoftware.com\n\n" +
-            "---\n\n" +
-            "© 2024 SURGE Software Solutions Private Limited. All rights reserved.",
-            componentType.substring(0, 1).toUpperCase() + componentType.substring(1),
-            componentType,
-            componentType,
-            componentType,
-            componentType,
-            new java.util.Date()
-        );
+    private String escapeHtml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#39;");
     }
+    
+    private String formatTimestamp(String timestamp) {
+        try {
+            LocalDateTime dt = LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS"));
+            DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.MEDIUM).withLocale(Locale.ENGLISH);
+            return dt.format(formatter);
+        } catch (Exception e) {
+            return timestamp;
+        }
+    }
+    
+
+    
+
+    
+
     
     private String escapeJsonString(String str) {
         if (str == null) {
             return "null";
         }
         
-        return "\"" + str.replace("\\", "\\\\")
-                        .replace("\"", "\\\"")
-                        .replace("\n", "\\n")
-                        .replace("\r", "\\r")
-                        .replace("\t", "\\t") + "\"";
+        return str.replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
+                  .replace("\n", "\\n")
+                  .replace("\r", "\\r")
+                  .replace("\t", "\\t");
     }
 } 

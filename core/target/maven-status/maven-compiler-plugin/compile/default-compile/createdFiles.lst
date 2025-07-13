@@ -1,4 +1,10 @@
-com\surgesoftware\aem\llm\core\services\OpenAIService.class
-com\surgesoftware\aem\llm\core\servlets\ComponentGeneratorServlet.class
+com\surgesoftware\aem\llm\core\config\ServiceUserConfig.class
 com\surgesoftware\aem\llm\core\services\impl\OpenAIServiceImpl.class
 com\surgesoftware\aem\llm\core\services\OpenAIConfiguration.class
+com\surgesoftware\aem\llm\core\services\impl\FileManagementServiceImpl.class
+com\surgesoftware\aem\llm\core\services\OpenAIService.class
+com\surgesoftware\aem\llm\core\servlets\ComponentGeneratorServlet.class
+com\surgesoftware\aem\llm\core\servlets\PreviewServlet.class
+com\surgesoftware\aem\llm\core\services\FileManagementService.class
+com\surgesoftware\aem\llm\core\servlets\DownloadServlet.class
+com\surgesoftware\aem\llm\core\servlets\LLMGeneratorUIServlet.class

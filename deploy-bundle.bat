@@ -13,6 +13,6 @@ echo To verify deployment, check:
 echo http://localhost:4502/system/console/bundles
 echo.
 echo To test the servlet, visit:
-echo http://localhost:4502/bin/surge/llm/generate?type=text^&format=json
+echo http://localhost:4502/content/aem-llm/generate?type=text^&format=json
 echo.
 pause 

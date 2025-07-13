@@ -34,6 +34,10 @@ import java.util.Map;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.metatype.annotations.Designate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * OpenAI Service Implementation for SURGE AEM LLM Connector
@@ -95,9 +99,19 @@ public class OpenAIServiceImpl implements OpenAIService {
         try {
             // Generate different types of files for the component
             files.put("dialog.xml", generateComponentFile(componentType, "dialog", requirements));
-            files.put(componentType + ".html", generateComponentFile(componentType, "html", requirements));
+            String html = generateComponentFile(componentType, "html", requirements);
+            files.put(componentType + ".html", html);
             files.put(componentType + ".js", generateComponentFile(componentType, "js", requirements));
             files.put(".content.xml", generateComponentFile(componentType, "content", requirements));
+            // NEW: Parse HTL for referenced properties
+            Set<String> htlProperties = extractHTLProperties(html);
+            // NEW: Generate Sling Model Java class with explicit property list
+            String modelClassName = capitalize(componentType) + "Model.java";
+            String modelRequirements = requirements;
+            if (!htlProperties.isEmpty()) {
+                modelRequirements = (modelRequirements == null ? "" : modelRequirements + ". ") + "The model must include the following properties: " + String.join(", ", htlProperties) + ".";
+            }
+            files.put(modelClassName, generateComponentFile(componentType, "java", modelRequirements));
             
             LOG.info("Successfully generated {} files for {} component", files.size(), componentType);
             return files;
@@ -257,6 +271,14 @@ public class OpenAIServiceImpl implements OpenAIService {
             case "content":
                 prompt.append("Create a .content.xml file with proper jcr:primaryType and component definitions.");
                 break;
+            case "java":
+                prompt.append("Create a Sling Model Java class for the ").append(componentType)
+                      .append(" component. The class should use @Model annotation, provide all properties referenced in the HTL, and include sample getters. Name the class ")
+                      .append(capitalize(componentType)).append("Model.");
+                break;
+            case "preview":
+                prompt.append("Given the following HTL (Sightly) code for an AEM component, assume the Sling Model provides sample data for all variables. Render the output as it would appear to an end user, replacing variables with realistic sample values. Output only the final HTML as it would appear in the browser.\nHTL code:\n");
+                break;
         }
         
         if (requirements != null && !requirements.isEmpty()) {
@@ -266,6 +288,11 @@ public class OpenAIServiceImpl implements OpenAIService {
         prompt.append(" Make sure the code follows AEM best practices and is production-ready.");
         
         return prompt.toString();
+    }
+    
+    private String capitalize(String str) {
+        if (str == null || str.isEmpty()) return str;
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
     
     private Map<String, String> getDefaultComponentFiles(String componentType) {
@@ -393,5 +420,17 @@ public class OpenAIServiceImpl implements OpenAIService {
             componentType.substring(0, 1).toUpperCase() + componentType.substring(1),
             componentType
         );
+    }
+
+    private Set<String> extractHTLProperties(String html) {
+        Set<String> properties = new HashSet<>();
+        if (html == null) return properties;
+        // Match ${component.property ...} or ${component.property}
+        Pattern pattern = Pattern.compile("\\$\\{component\\.([a-zA-Z0-9_]+)");
+        Matcher matcher = pattern.matcher(html);
+        while (matcher.find()) {
+            properties.add(matcher.group(1));
+        }
+        return properties;
     }
 } 
