@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
 
 /**
  * OpenAI Service Implementation for SURGE AEM LLM Connector
@@ -39,6 +41,11 @@ import java.util.Map;
  * 
  * @author SURGE Software Solutions Private Limited
  */
+@Component(service = OpenAIService.class,
+    property = {
+        "service.description=SURGE AEM LLM Connector - OpenAI Service",
+        "service.vendor=SURGE Software Solutions Private Limited"
+    })
 public class OpenAIServiceImpl implements OpenAIService {
     
     private static final Logger LOG = LoggerFactory.getLogger(OpenAIServiceImpl.class);
@@ -47,6 +54,7 @@ public class OpenAIServiceImpl implements OpenAIService {
     private static final String OPENAI_API_KEY = "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";
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
     
+    @Activate
     protected void activate() {
         LOG.info("SURGE AEM LLM Connector: OpenAI Service activated successfully");
         LOG.info("OpenAI API URL: {}", OPENAI_API_URL);

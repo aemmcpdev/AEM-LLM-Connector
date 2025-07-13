@@ -33,6 +33,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.jcr.Session;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.Activate;
 
 /**
  * Component Generator Servlet for SURGE AEM LLM Connector
@@ -45,17 +48,24 @@ import org.apache.sling.api.resource.ResourceResolver;
  * 
  * @author SURGE Software Solutions Private Limited
  */
+@Component(service = Servlet.class,
+    property = {
+        "sling.servlet.paths=/bin/surge/llm/generate",
+        "sling.servlet.methods=" + HttpConstants.METHOD_GET,
+        "sling.servlet.methods=" + HttpConstants.METHOD_POST,
+        "sling.auth.requirements=-/bin/surge/llm/generate",
+        "service.description=SURGE AEM LLM Connector - Component Generator Servlet",
+        "service.vendor=SURGE Software Solutions Private Limited"
+    })
 public class ComponentGeneratorServlet extends SlingAllMethodsServlet {
     
     private static final Logger LOG = LoggerFactory.getLogger(ComponentGeneratorServlet.class);
     private static final long serialVersionUID = 1L;
     
+    @Reference
     private OpenAIService openAIService;
     
-    protected void setOpenAIService(OpenAIService openAIService) {
-        this.openAIService = openAIService;
-    }
-    
+    @Activate
     protected void activate() {
         LOG.info("SURGE AEM LLM Connector: ComponentGeneratorServlet activated successfully");
         LOG.info("Servlet registered at path: /bin/surge/llm/generate");
