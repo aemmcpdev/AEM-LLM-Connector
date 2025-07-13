@@ -43,7 +43,7 @@
         <repository>
             <id>adobe-public-releases</id>
             <name>Adobe Public Repository</name>
-            <url>https://repo1.maven.org/maven2/com/adobe/aem/</url>
+            <url>https://repo.adobe.com/nexus/content/groups/public/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -52,6 +52,20 @@
             </snapshots>
         </repository>
     </repositories>
+    
+    <pluginRepositories>
+        <pluginRepository>
+            <id>adobe-public-releases</id>
+            <name>Adobe Public Repository</name>
+            <url>https://repo.adobe.com/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
     
     <dependencyManagement>
         <dependencies>
@@ -161,6 +175,7 @@
                         <targetURL>http://localhost:4502/crx/packmgr/service.jsp</targetURL>
                         <username>admin</username>
                         <password>admin</password>
+                        <failOnError>false</failOnError>
                     </configuration>
                 </plugin>
             </plugins>

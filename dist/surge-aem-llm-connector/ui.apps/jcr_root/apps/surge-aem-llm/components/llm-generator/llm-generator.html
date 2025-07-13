@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<div class="llm-generator-container">
+    <div class="llm-generator-header">
+        <h2>SURGE AEM LLM Component Generator</h2>
+        <p>Enter a prompt to generate AEM component files with AI assistance</p>
+    </div>
+    
+    <div class="llm-generator-content">
+        <div class="llm-generator-input-section">
+            <div class="form-group">
+                <label for="prompt-input">Component Prompt:</label>
+                <textarea id="prompt-input" 
+                         placeholder="Enter your prompt here (e.g., 'Create a text component with title and description')"
+                         rows="4"
+                         class="prompt-textarea"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <button id="generate-btn" class="generate-button">
+                    <span class="button-text">Generate Component</span>
+                    <span class="loading-spinner" style="display: none;">⏳ Generating...</span>
+                </button>
+            </div>
+            
+            <div id="status-message" class="status-message"></div>
+        </div>
+        
+        <div class="llm-generator-preview-section">
+            <div class="preview-header">
+                <h3>Live Preview</h3>
+                <div class="preview-actions">
+                    <button id="download-btn" class="action-button" style="display: none;">
+                        📥 Download ZIP
+                    </button>
+                </div>
+            </div>
+            
+            <div id="preview-container" class="preview-container">
+                <div class="preview-placeholder">
+                    <p>💡 Enter a prompt and click "Generate Component" to see the live preview here</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .llm-generator-container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        background: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .llm-generator-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .llm-generator-header h2 {
+        color: #333;
+        margin: 0 0 10px 0;
+        font-size: 24px;
+    }
+    
+    .llm-generator-header p {
+        color: #666;
+        margin: 0;
+        font-size: 14px;
+    }
+    
+    .llm-generator-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        min-height: 500px;
+    }
+    
+    .llm-generator-input-section {
+        background: white;
+        padding: 20px;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .prompt-textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        resize: vertical;
+        min-height: 100px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .prompt-textarea:focus {
+        outline: none;
+        border-color: #007cba;
+    }
+    
+    .generate-button {
+        background: #007cba;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        width: 100%;
+    }
+    
+    .generate-button:hover {
+        background: #005a87;
+    }
+    
+    .generate-button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+    
+    .action-button {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    .action-button:hover {
+        background: #218838;
+    }
+    
+    .status-message {
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+        display: none;
+    }
+    
+    .status-message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .status-message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .llm-generator-preview-section {
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .preview-header {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .preview-header h3 {
+        margin: 0;
+        color: #333;
+        font-size: 18px;
+    }
+    
+    .preview-container {
+        height: 400px;
+        overflow: auto;
+        position: relative;
+    }
+    
+    .preview-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #999;
+        font-style: italic;
+        text-align: center;
+    }
+    
+    .preview-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+    
+    @media (max-width: 768px) {
+        .llm-generator-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .llm-generator-container {
+            margin: 10px;
+            padding: 15px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const promptInput = document.getElementById('prompt-input');
+        const generateBtn = document.getElementById('generate-btn');
+        const downloadBtn = document.getElementById('download-btn');
+        const statusMessage = document.getElementById('status-message');
+        const previewContainer = document.getElementById('preview-container');
+        const buttonText = generateBtn.querySelector('.button-text');
+        const loadingSpinner = generateBtn.querySelector('.loading-spinner');
+        
+        let currentDownloadUrl = null;
+        
+        generateBtn.addEventListener('click', function() {
+            const prompt = promptInput.value.trim();
+            
+            if (!prompt) {
+                showStatusMessage('Please enter a prompt before generating.', 'error');
+                return;
+            }
+            
+            // Show loading state
+            setLoadingState(true);
+            showStatusMessage('Generating component files...', 'info');
+            
+            // Make POST request to the servlet
+            fetch('/bin/aem-llm/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'prompt=' + encodeURIComponent(prompt)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    showStatusMessage('Component generated successfully! ' + data.filesGenerated + ' files created.', 'success');
+                    
+                    // Store download URL
+                    currentDownloadUrl = data.downloadUrl;
+                    
+                    // Show download button
+                    downloadBtn.style.display = 'inline-block';
+                    
+                    // Load preview if available
+                    if (data.previewUrl) {
+                        loadPreview(data.previewUrl);
+                    } else {
+                        showPreviewPlaceholder('Preview not available for this component.');
+                    }
+                } else {
+                    showStatusMessage('Error: ' + (data.message || 'Unknown error occurred'), 'error');
+                    showPreviewPlaceholder('Generation failed. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showStatusMessage('Error: Failed to generate component. Please try again.', 'error');
+                showPreviewPlaceholder('Generation failed. Please try again.');
+            })
+            .finally(() => {
+                setLoadingState(false);
+            });
+        });
+        
+        downloadBtn.addEventListener('click', function() {
+            if (currentDownloadUrl) {
+                window.open(currentDownloadUrl, '_blank');
+            }
+        });
+        
+        function setLoadingState(isLoading) {
+            generateBtn.disabled = isLoading;
+            buttonText.style.display = isLoading ? 'none' : 'inline';
+            loadingSpinner.style.display = isLoading ? 'inline' : 'none';
+        }
+        
+        function showStatusMessage(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message ' + type;
+            statusMessage.style.display = 'block';
+            
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        function loadPreview(previewUrl) {
+            previewContainer.innerHTML = '<iframe src="' + previewUrl + '" class="preview-iframe" sandbox="allow-same-origin allow-scripts"></iframe>';
+        }
+        
+        function showPreviewPlaceholder(message) {
+            previewContainer.innerHTML = '<div class="preview-placeholder"><p>' + message + '</p></div>';
+        }
+        
+        // Allow Enter key to submit (Ctrl+Enter for new line)
+        promptInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey) {
+                e.preventDefault();
+                generateBtn.click();
+            }
+        });
+    });
+</script> 

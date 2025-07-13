@@ -43,6 +43,7 @@
             <plugin>
                 <groupId>com.day.jcr.vault</groupId>
                 <artifactId>content-package-maven-plugin</artifactId>
+                <version>1.0.2</version>
                 <extensions>true</extensions>
                 <configuration>
                     <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
