@@ -19,9 +19,7 @@ import com.surgesoftware.aem.llm.core.services.OpenAIService;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.HttpConstants;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +31,8 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javax.jcr.Session;
+import org.apache.sling.api.resource.ResourceResolver;
 
 /**
  * Component Generator Servlet for SURGE AEM LLM Connector
@@ -45,29 +45,57 @@ import java.util.zip.ZipOutputStream;
  * 
  * @author SURGE Software Solutions Private Limited
  */
-@Component(
-    service = Servlet.class,
-    immediate = true,
-    property = {
-        "sling.servlet.methods=" + HttpConstants.METHOD_GET,
-        "sling.servlet.paths=/bin/surge/llm/generate"
-    }
-)
-public class ComponentGeneratorServlet extends SlingSafeMethodsServlet {
+public class ComponentGeneratorServlet extends SlingAllMethodsServlet {
     
     private static final Logger LOG = LoggerFactory.getLogger(ComponentGeneratorServlet.class);
     private static final long serialVersionUID = 1L;
     
-    @Reference
     private OpenAIService openAIService;
+    
+    protected void setOpenAIService(OpenAIService openAIService) {
+        this.openAIService = openAIService;
+    }
+    
+    protected void activate() {
+        LOG.info("SURGE AEM LLM Connector: ComponentGeneratorServlet activated successfully");
+        LOG.info("Servlet registered at path: /bin/surge/llm/generate");
+    }
     
     @Override
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
+        processRequest(request, response);
+    }
+    
+    @Override
+    protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+    
+    private void processRequest(SlingHttpServletRequest request, SlingHttpServletResponse response)
+            throws ServletException, IOException {
         
         LOG.info("SURGE AEM LLM Connector: Processing component generation request");
         
+        // Simple test response first
+        if ("test".equals(request.getParameter("mode"))) {
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"status\": \"success\", \"message\": \"SURGE AEM LLM Connector is working!\", \"timestamp\": " + System.currentTimeMillis() + "}");
+            return;
+        }
+        
         try {
+            // Check if OpenAI service is available
+            if (openAIService == null) {
+                LOG.error("OpenAI service is not available");
+                response.setStatus(503);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"OpenAI service not available\", \"status\": \"service_unavailable\"}");
+                return;
+            }
+            
             // Get request parameters
             String componentType = request.getParameter("type");
             String requirements = request.getParameter("requirements");

@@ -23,8 +23,6 @@ import java.net.URL;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +39,6 @@ import java.util.Map;
  * 
  * @author SURGE Software Solutions Private Limited
  */
-@Component(
-    service = OpenAIService.class,
-    configurationPolicy = ConfigurationPolicy.OPTIONAL,
-    immediate = true
-)
 public class OpenAIServiceImpl implements OpenAIService {
     
     private static final Logger LOG = LoggerFactory.getLogger(OpenAIServiceImpl.class);
@@ -53,6 +46,12 @@ public class OpenAIServiceImpl implements OpenAIService {
     // TODO: Move to OSGi configuration
     private static final String OPENAI_API_KEY = "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";
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+    
+    protected void activate() {
+        LOG.info("SURGE AEM LLM Connector: OpenAI Service activated successfully");
+        LOG.info("OpenAI API URL: {}", OPENAI_API_URL);
+        LOG.info("OpenAI Service ready to generate AEM component files");
+    }
     
     // Using Sling JSON instead of Jackson
     

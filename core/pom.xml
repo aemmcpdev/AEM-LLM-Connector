@@ -17,11 +17,49 @@
     <description>Core OSGi bundle for SURGE AEM LLM Connector containing servlets and services</description>
     
     <dependencies>
+        <!-- AEM 6.5+ API -->
+        <dependency>
+            <groupId>com.adobe.aem</groupId>
+            <artifactId>uber-jar</artifactId>
+            <classifier>apis</classifier>
+            <scope>provided</scope>
+        </dependency>
+        
         <!-- Servlet API -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- OSGi Annotations for AEM 6.5+ -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component.annotations</artifactId>
+            <version>1.4.0</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.metatype.annotations</artifactId>
+            <version>1.4.0</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.annotation.versioning</artifactId>
+            <version>1.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- Sling Servlet Annotations -->
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.servlets.annotations</artifactId>
+            <version>1.2.4</version>
             <scope>provided</scope>
         </dependency>
         
@@ -99,8 +137,10 @@
                             java.io,
                             java.util,
                             java.util.zip,
+                            java.nio.charset,
                             *;resolution:=optional
                         </Import-Package>
+                        <Service-Component>OSGI-INF/*.xml</Service-Component>
                     </instructions>
                 </configuration>
             </plugin>
