@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>SURGE AEM LLM Connector - All</comment>
+<entry key="allowIndexDefinitions">false</entry>
+<entry key="createdBy">SURGE AEM LLM Connector</entry>
+<entry key="created">2025-08-03T07:02:12.097Z</entry>
+<entry key="groupId">com.surgesoftware.aem</entry>
+<entry key="name">surge-aem-llm-connector</entry>
+<entry key="description">SURGE AEM LLM Connector - Complete Package</entry>
+<entry key="artifactId">surge-aem-llm-connector.all</entry>
+<entry key="version">1.0.0-SNAPSHOT</entry>
+<entry key="packageType">mixed</entry>
+<entry key="requiresRoot">false</entry>
+<entry key="group">SURGE Software Solutions</entry>
+</properties>

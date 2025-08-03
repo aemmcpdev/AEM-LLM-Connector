@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Created-By: Apache Jackrabbit FileVault - Package Maven Plugin 1.3.6
+Build-Jdk-Spec: 11
+Implementation-Title: SURGE AEM LLM Connector - All
+Implementation-Version: 1.0.0-SNAPSHOT
+Implementation-Vendor: SURGE Software Solutions Private Limited
+Content-Package-Type: mixed
+Content-Package-Id: SURGE Software Solutions:surge-aem-llm-connector:1.0
+ .0-SNAPSHOT
+Content-Package-Description: SURGE AEM LLM Connector - Complete Package
+Content-Package-Roots: /apps/surge-aem-llm-connector,/content/surge-aem-
+ llm-connector,/etc/packages/SURGE Software Solutions/surge-aem-llm-conn
+ ector.ui.apps-1.0.0-SNAPSHOT.zip,/etc/packages/SURGE Software Solutions
+ /surge-aem-llm-connector.ui.content-1.0.0-SNAPSHOT.zip
+

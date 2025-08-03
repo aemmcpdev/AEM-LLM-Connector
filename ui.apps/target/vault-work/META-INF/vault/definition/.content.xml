@@ -1,0 +1,3 @@
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0"
+    jcr:primaryType="vlt:PackageDefinition"
+    builtWith="Apache Jackrabbit FileVault - Package Maven Plugin 1.3.6"/>

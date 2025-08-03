@@ -44,6 +44,34 @@
             font-size: 16px;
         }
         
+        /* LLM Status Indicator */
+        .llm-status {
+            margin-top: 15px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .llm-status.connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .llm-status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .llm-status.checking {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
         .main-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -225,6 +253,143 @@
             animation: spin 1s linear infinite;
         }
         
+        /* NEW: Image Upload Styles */
+        .image-upload-container {
+            position: relative;
+            border: 2px dashed #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+        
+        .image-upload-container:hover {
+            border-color: #3498db;
+            background: #f8fbff;
+        }
+        
+        .image-upload-container.dragover {
+            border-color: #3498db;
+            background: #e8f4f8;
+        }
+        
+        .image-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .image-upload-label {
+            pointer-events: none;
+            color: #7f8c8d;
+        }
+        
+        .upload-icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .upload-text {
+            font-size: 14px;
+        }
+        
+        .image-preview {
+            position: relative;
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .remove-image-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .remove-image-btn:hover {
+            background: #c0392b;
+        }
+        
+        .help-text {
+            color: #95a5a6;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        /* NEW: Iterative Improvement Styles */
+        .iterative-panel {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .iterative-panel h4 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+        
+        .improvement-textarea {
+            min-height: 80px;
+        }
+        
+        .improve-button {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .improve-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+        }
+        
+        .improve-button:active {
+            transform: translateY(0);
+        }
+        
+        .improve-button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -249,6 +414,9 @@
         <div class="header">
             <h1>🚀 SURGE AEM LLM Component Generator</h1>
             <p>Generate AEM component files with AI assistance - Enter a prompt and get instant results</p>
+            <div id="llm-status" class="llm-status checking">
+                🔄 Checking LLM connection...
+            </div>
         </div>
         
         <div class="main-content">
@@ -261,11 +429,45 @@
                              rows="6"></textarea>
                 </div>
                 
+                <!-- NEW: Image Input Support -->
+                <div class="form-group">
+                    <label for="image-input">Upload Image (Optional)</label>
+                    <div class="image-upload-container">
+                        <input type="file" id="image-input" class="image-input" accept="image/*" />
+                        <div class="image-upload-label">
+                            <span class="upload-icon">📷</span>
+                            <span class="upload-text">Click to upload an image or drag & drop</span>
+                        </div>
+                        <div id="image-preview" class="image-preview" style="display: none;">
+                            <img id="preview-img" src="" alt="Preview" />
+                            <button type="button" id="remove-image" class="remove-image-btn">✕</button>
+                        </div>
+                    </div>
+                    <small class="help-text">Upload an image to generate components based on visual analysis</small>
+                </div>
+                
                 <div class="form-group">
                     <button id="generate-btn" class="generate-button">
                         <span class="button-text">Generate Component</span>
                         <span class="loading-spinner">🔄</span>
                     </button>
+                </div>
+                
+                <!-- NEW: Iterative Improvement Panel -->
+                <div id="iterative-panel" class="iterative-panel" style="display: none;">
+                    <h4>💬 Improve Your Component</h4>
+                    <div class="form-group">
+                        <textarea id="improvement-input" 
+                                 class="prompt-textarea improvement-textarea"
+                                 placeholder="Describe how you'd like to improve the component...&#10;&#10;Examples:&#10;• Make the text bigger&#10;• Add a border around the component&#10;• Change the background color to blue&#10;• Add more fields for user input"
+                                 rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button id="improve-btn" class="improve-button">
+                            <span class="button-text">✨ Improve Component</span>
+                            <span class="loading-spinner">🔄</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <div id="status-message" class="status-message"></div>
@@ -303,7 +505,84 @@
             const buttonText = generateBtn.querySelector('.button-text');
             const loadingSpinner = generateBtn.querySelector('.loading-spinner');
             
+            // NEW: Image upload elements
+            const imageInput = document.getElementById('image-input');
+            const imageUploadContainer = document.querySelector('.image-upload-container');
+            const imageUploadLabel = document.querySelector('.image-upload-label');
+            const imagePreview = document.getElementById('image-preview');
+            const previewImg = document.getElementById('preview-img');
+            const removeImageBtn = document.getElementById('remove-image');
+            
+            // NEW: Iterative improvement elements
+            const iterativePanel = document.getElementById('iterative-panel');
+            const improvementInput = document.getElementById('improvement-input');
+            const improveBtn = document.getElementById('improve-btn');
+            const improveButtonText = improveBtn.querySelector('.button-text');
+            const improveLoadingSpinner = improveBtn.querySelector('.loading-spinner');
+            
             let currentDownloadUrl = null;
+            let selectedImageFile = null;
+            let currentComponentData = null;
+            
+            // LLM Status elements
+            const llmStatus = document.getElementById('llm-status');
+            
+            // NEW: Image upload event handlers
+            imageInput.addEventListener('change', handleImageSelect);
+            removeImageBtn.addEventListener('click', removeImage);
+            
+            // Drag and drop functionality
+            imageUploadContainer.addEventListener('dragover', handleDragOver);
+            imageUploadContainer.addEventListener('dragleave', handleDragLeave);
+            imageUploadContainer.addEventListener('drop', handleImageDrop);
+            
+            function handleImageSelect(event) {
+                const file = event.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    selectedImageFile = file;
+                    displayImagePreview(file);
+                }
+            }
+            
+            function handleDragOver(event) {
+                event.preventDefault();
+                imageUploadContainer.classList.add('dragover');
+            }
+            
+            function handleDragLeave(event) {
+                event.preventDefault();
+                imageUploadContainer.classList.remove('dragover');
+            }
+            
+            function handleImageDrop(event) {
+                event.preventDefault();
+                imageUploadContainer.classList.remove('dragover');
+                
+                const files = event.dataTransfer.files;
+                if (files.length > 0 && files[0].type.startsWith('image/')) {
+                    selectedImageFile = files[0];
+                    imageInput.files = files;
+                    displayImagePreview(files[0]);
+                }
+            }
+            
+            function displayImagePreview(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imageUploadLabel.style.display = 'none';
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            function removeImage() {
+                selectedImageFile = null;
+                imageInput.value = '';
+                previewImg.src = '';
+                imageUploadLabel.style.display = 'block';
+                imagePreview.style.display = 'none';
+            }
             
             generateBtn.addEventListener('click', function() {
                 const prompt = promptInput.value.trim();
@@ -316,16 +595,45 @@
                 
                 // Show loading state
                 setLoadingState(true);
-                showStatusMessage('🔄 Generating component files... This may take a few moments.', 'info');
                 hideDownloadButton();
                 
-                // Make POST request to the servlet
+                // Enhanced progress messaging
+                let progressMessage = '🔄 Generating component files...';
+                if (selectedImageFile) {
+                    progressMessage = '🔄 Processing image and generating component... This may take 1-2 minutes.';
+                } else {
+                    progressMessage = '⏳ Waiting for LLM response... Large models may take up to 3 minutes.';
+                }
+                showStatusMessage(progressMessage, 'info');
+                
+                // Show progress updates
+                let progressTimer = setInterval(() => {
+                    const messages = [
+                        '⏳ Waiting for LLM response...',
+                        '🧠 Model is processing your request...',
+                        '⚡ Generating component structure...',
+                        '🔧 Almost done, finalizing output...'
+                    ];
+                    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+                    showStatusMessage(randomMsg, 'info');
+                }, 30000); // Update every 30 seconds
+                
+                // NEW: Create FormData to handle both text and image
+                const formData = new FormData();
+                formData.append('prompt', prompt);
+                
+                if (selectedImageFile) {
+                    formData.append('image', selectedImageFile);
+                }
+                
+                // Make POST request with 4-minute timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 240000); // 4 minutes
+                
                 fetch('/bin/aem-llm/generate', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'prompt=' + encodeURIComponent(prompt)
+                    body: formData,
+                    signal: controller.signal
                 })
                 .then(response => {
                     if (!response.ok) {
@@ -334,6 +642,9 @@
                     return response.json();
                 })
                 .then(data => {
+                    clearInterval(progressTimer);
+                    clearTimeout(timeoutId);
+                    
                     if (data.status === 'success') {
                         showStatusMessage('✅ Component generated successfully! ' + data.filesGenerated + ' files created.', 'success');
                         
@@ -349,15 +660,32 @@
                         } else {
                             showPreviewPlaceholder('Preview not available for this component.');
                         }
+                        
+                        // NEW: Enable iterative improvement
+                        enableIterativeMode(data);
                     } else {
-                        showStatusMessage('❌ Error: ' + (data.message || 'Unknown error occurred'), 'error');
-                        showPreviewPlaceholder('Generation failed. Please try again.');
+                        // Check for model-specific errors first
+                        if (data.modelError) {
+                            showStatusMessage('❌ Model not available: ' + data.modelError, 'error');
+                            showPreviewPlaceholder('Model unavailable. ' + data.modelError);
+                        } else {
+                            showStatusMessage('❌ Error: ' + (data.message || 'Unknown error occurred'), 'error');
+                            showPreviewPlaceholder('Generation failed. Please try again.');
+                        }
                     }
                 })
                 .catch(error => {
+                    clearInterval(progressTimer);
+                    clearTimeout(timeoutId);
                     console.error('Error:', error);
-                    showStatusMessage('❌ Error: Failed to generate component. Please check your connection and try again.', 'error');
-                    showPreviewPlaceholder('Generation failed. Please try again.');
+                    
+                    if (error.name === 'AbortError') {
+                        showStatusMessage('⏰ Request timed out after 4 minutes. Try using a smaller model or increase server timeout.', 'error');
+                        showPreviewPlaceholder('Request timed out. Consider using a lighter model like llava:7b.');
+                    } else {
+                        showStatusMessage('❌ Error: Failed to generate component. Please check your connection and try again.', 'error');
+                        showPreviewPlaceholder('Generation failed. Please try again.');
+                    }
                 })
                 .finally(() => {
                     setLoadingState(false);
@@ -370,6 +698,74 @@
                 }
             });
             
+            // NEW: Improvement button event handler
+            improveBtn.addEventListener('click', function() {
+                const improvement = improvementInput.value.trim();
+                
+                if (!improvement) {
+                    showStatusMessage('Please describe how you\'d like to improve the component.', 'error');
+                    improvementInput.focus();
+                    return;
+                }
+                
+                if (!currentComponentData) {
+                    showStatusMessage('No component to improve. Please generate a component first.', 'error');
+                    return;
+                }
+                
+                // Show loading state
+                setImprovementLoadingState(true);
+                showStatusMessage('🔄 Improving component based on your feedback...', 'info');
+                
+                // Create improvement request
+                const formData = new FormData();
+                formData.append('prompt', currentComponentData.componentName + ': ' + improvement);
+                formData.append('requirements', 'This is an improvement request for an existing component. Current component description: ' + currentComponentData.componentDescription + '. Apply the following changes: ' + improvement);
+                
+                // Make POST request for improvement
+                fetch('/bin/aem-llm/generate', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        showStatusMessage('✅ Component improved successfully!', 'success');
+                        
+                        // Update current data
+                        currentComponentData = data;
+                        currentDownloadUrl = data.downloadUrl;
+                        
+                        // Update preview
+                        if (data.previewUrl) {
+                            loadPreview(data.previewUrl);
+                        }
+                        
+                        // Clear improvement input
+                        improvementInput.value = '';
+                    } else {
+                        // Check for model-specific errors first
+                        if (data.modelError) {
+                            showStatusMessage('❌ Model not available for improvement: ' + data.modelError, 'error');
+                        } else {
+                            showStatusMessage('❌ Error improving component: ' + (data.message || 'Unknown error occurred'), 'error');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showStatusMessage('❌ Error: Failed to improve component. Please try again.', 'error');
+                })
+                .finally(() => {
+                    setImprovementLoadingState(false);
+                });
+            });
+            
             function setLoadingState(isLoading) {
                 generateBtn.disabled = isLoading;
                 buttonText.style.display = isLoading ? 'none' : 'inline';
@@ -380,6 +776,25 @@
                 } else {
                     loadingSpinner.classList.remove('spinning');
                 }
+            }
+            
+            // NEW: Loading state for improvement button
+            function setImprovementLoadingState(isLoading) {
+                improveBtn.disabled = isLoading;
+                improveButtonText.style.display = isLoading ? 'none' : 'inline';
+                improveLoadingSpinner.style.display = isLoading ? 'inline' : 'none';
+                
+                if (isLoading) {
+                    improveLoadingSpinner.classList.add('spinning');
+                } else {
+                    improveLoadingSpinner.classList.remove('spinning');
+                }
+            }
+            
+            // NEW: Enable iterative mode after successful generation
+            function enableIterativeMode(data) {
+                currentComponentData = data;
+                iterativePanel.style.display = 'block';
             }
             
             function showStatusMessage(message, type) {
@@ -425,6 +840,35 @@
                     // You could add sample prompts here if needed
                 }
             });
+            
+            // LLM Status Functions
+            function checkLLMStatus() {
+                llmStatus.className = 'llm-status checking';
+                llmStatus.innerHTML = '🔄 Checking LLM connection...';
+                
+                fetch('/bin/aem-llm/ping')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.connected) {
+                            llmStatus.className = 'llm-status connected';
+                            llmStatus.innerHTML = '✅ Local LLM is reachable (' + data.llmInfo.split(' - ')[1] + ')';
+                        } else {
+                            llmStatus.className = 'llm-status disconnected';
+                            llmStatus.innerHTML = '❌ Local LLM not responding - ' + data.message;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('LLM ping failed:', error);
+                        llmStatus.className = 'llm-status disconnected';
+                        llmStatus.innerHTML = '❌ Cannot reach LLM service';
+                    });
+            }
+            
+            // Check LLM status on page load
+            checkLLMStatus();
+            
+            // Optionally recheck status every 30 seconds
+            setInterval(checkLLMStatus, 30000);
         });
     </script>
 </body>

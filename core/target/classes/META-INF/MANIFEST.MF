@@ -1,0 +1,67 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1754236126841
+Build-Jdk-Spec: 11
+Bundle-Description: Core OSGi bundle for SURGE AEM LLM Connector contain
+ ing servlets and services for Local LLM integration
+Bundle-DocURL: https://surgesoftware.com
+Bundle-ManifestVersion: 2
+Bundle-Name: SURGE AEM LLM Connector Core
+Bundle-SymbolicName: com.surgesoftware.aem.surge-aem-llm-connector.core
+Bundle-Vendor: SURGE Software Solutions Private Limited
+Bundle-Version: 2.0.0.SNAPSHOT
+Created-By: Apache Maven Bundle Plugin 5.1.8
+Export-Package: com.surgesoftware.aem.llm.core.services;version="2.0.0.S
+ NAPSHOT";uses:="com.surgesoftware.aem.llm.core.models",com.surgesoftwar
+ e.aem.llm.core.models;version="2.0.0.SNAPSHOT",com.surgesoftware.aem.ll
+ m.core.config;version="2.0.0.SNAPSHOT";uses:="org.apache.sling.api.reso
+ urce"
+Import-Package: javax.servlet;version="[2.5,4)",org.apache.sling.api;ver
+ sion="[2.0,3)",org.apache.sling.api.servlets;version="[2.0,3)",org.slf4
+ j;version="[1.5,2)",com.fasterxml.jackson.core;version="[2.0,3)",com.fa
+ sterxml.jackson.databind;version="[2.0,3)",com.fasterxml.jackson.annota
+ tion;version="[2.0,3)",org.apache.http;version="[4.0,5)",java.net,java.
+ io,java.util,java.util.zip,java.nio.charset,java.time,java.time.format,
+ com.surgesoftware.aem.llm.core.config;resolution:=optional;version="[2.
+ 0,3)",com.surgesoftware.aem.llm.core.exceptions;resolution:=optional,co
+ m.surgesoftware.aem.llm.core.models;resolution:=optional;version="[2.0,
+ 3)",com.surgesoftware.aem.llm.core.services;resolution:=optional;versio
+ n="[2.0,3)",java.lang;resolution:=optional,java.lang.annotation;resolut
+ ion:=optional,java.lang.invoke;resolution:=optional,java.util.function;
+ resolution:=optional,javax.jcr;resolution:=optional;version="[2.0,3)",o
+ rg.apache.commons.io;resolution:=optional;version="[1.4,2)",org.apache.
+ http.client.config;resolution:=optional;version="[4.5,5)",org.apache.ht
+ tp.client.methods;resolution:=optional;version="[4.5,5)",org.apache.htt
+ p.conn;resolution:=optional;version="[4.5,5)",org.apache.http.entity;re
+ solution:=optional;version="[4.4,5)",org.apache.http.impl.client;resolu
+ tion:=optional;version="[4.5,5)",org.apache.http.util;resolution:=optio
+ nal;version="[4.4,5)",org.apache.sling.api.request;resolution:=optional
+ ;version="[2.4,3)",org.apache.sling.api.resource;resolution:=optional;v
+ ersion="[2.11,3)",javax.servlet.http;version="[2.5,4)"
+Provide-Capability: osgi.service;objectClass:List<String>="com.surgesoft
+ ware.aem.llm.core.config.ServiceUserConfig";uses:="com.surgesoftware.ae
+ m.llm.core.config",osgi.service;objectClass:List<String>="com.surgesoft
+ ware.aem.llm.core.services.FileManagementService";uses:="com.surgesoftw
+ are.aem.llm.core.services",osgi.service;objectClass:List<String>="com.s
+ urgesoftware.aem.llm.core.services.LocalLLMService";uses:="com.surgesof
+ tware.aem.llm.core.services",osgi.service;objectClass:List<String>="jav
+ ax.servlet.Servlet";uses:="javax.servlet"
+Require-Capability: osgi.service;filter:="(objectClass=com.surgesoftware
+ .aem.llm.core.config.ServiceUserConfig)";effective:=active,osgi.service
+ ;filter:="(objectClass=com.surgesoftware.aem.llm.core.services.FileMana
+ gementService)";effective:=active,osgi.service;filter:="(objectClass=co
+ m.surgesoftware.aem.llm.core.services.LocalLLMService)";effective:=acti
+ ve,osgi.service;filter:="(objectClass=org.apache.sling.api.resource.Res
+ ourceResolverFactory)";effective:=active,osgi.extender;filter:="(&(osgi
+ .extender=osgi.component)(version>=1.4.0)(!(version>=2.0.0)))",osgi.ee;
+ filter:="(&(osgi.ee=JavaSE)(version=11))"
+Service-Component: OSGI-INF/com.surgesoftware.aem.llm.core.config.Servic
+ eUserConfig.xml,OSGI-INF/com.surgesoftware.aem.llm.core.services.impl.F
+ ileManagementServiceImpl.xml,OSGI-INF/com.surgesoftware.aem.llm.core.se
+ rvices.impl.LocalLLMServiceImpl.xml,OSGI-INF/com.surgesoftware.aem.llm.
+ core.servlets.ComponentGeneratorServlet.xml,OSGI-INF/com.surgesoftware.
+ aem.llm.core.servlets.DownloadServlet.xml,OSGI-INF/com.surgesoftware.ae
+ m.llm.core.servlets.HealthCheckServlet.xml,OSGI-INF/com.surgesoftware.a
+ em.llm.core.servlets.LLMGeneratorUIServlet.xml,OSGI-INF/com.surgesoftwa
+ re.aem.llm.core.servlets.PingServlet.xml,OSGI-INF/com.surgesoftware.aem
+ .llm.core.servlets.PreviewServlet.xml
+Tool: Bnd-6.3.1.202206071316

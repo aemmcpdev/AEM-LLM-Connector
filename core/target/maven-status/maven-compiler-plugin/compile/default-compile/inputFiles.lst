@@ -1,0 +1,17 @@
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\services\impl\FileManagementServiceImpl.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\services\LocalLLMConfiguration.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\servlets\PingServlet.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\servlets\PreviewServlet.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\models\ComponentGenerationResponse.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\models\ComponentGenerationRequest.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\models\LLMResponse.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\models\ComponentField.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\servlets\DownloadServlet.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\config\ServiceUserConfig.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\exceptions\LLMUnavailableException.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\servlets\LLMGeneratorUIServlet.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\services\LocalLLMService.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\services\impl\LocalLLMServiceImpl.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\servlets\HealthCheckServlet.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\services\FileManagementService.java
+C:\Users\ADMIN\Desktop\Connector V4\AEM-LLM-Connector\core\src\main\java\com\surgesoftware\aem\llm\core\servlets\ComponentGeneratorServlet.java

@@ -31,7 +31,7 @@ import java.io.PrintWriter;
 /**
  * Servlet to serve the LLM Generator UI
  * 
- * This servlet serves the HTML interface for the LLM component generator.
+ * This servlet serves the HTML interface for the Local LLM component generator.
  * 
  * @author SURGE Software Solutions Private Limited
  */
@@ -52,7 +52,7 @@ public class LLMGeneratorUIServlet extends SlingAllMethodsServlet {
     protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response)
             throws ServletException, IOException {
         
-        LOG.debug("Serving LLM Generator UI");
+        LOG.debug("Serving Local LLM Generator UI");
         
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");
@@ -68,7 +68,7 @@ public class LLMGeneratorUIServlet extends SlingAllMethodsServlet {
                "<head>\n" +
                "    <meta charset=\"UTF-8\">\n" +
                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
-               "    <title>SURGE AEM LLM Component Generator</title>\n" +
+               "    <title>SURGE AEM LLM Component Generator (Local LLM)</title>\n" +
                "    <style>\n" +
                "        * {\n" +
                "            margin: 0;\n" +
@@ -107,6 +107,14 @@ public class LLMGeneratorUIServlet extends SlingAllMethodsServlet {
                "        .header p {\n" +
                "            color: #7f8c8d;\n" +
                "            font-size: 16px;\n" +
+               "        }\n" +
+               "        \n" +
+               "        .llm-info {\n" +
+               "            background: #e8f4f8;\n" +
+               "            border-left: 4px solid #3498db;\n" +
+               "            padding: 15px;\n" +
+               "            margin: 20px 0;\n" +
+               "            border-radius: 5px;\n" +
                "        }\n" +
                "        \n" +
                "        .main-content {\n" +
@@ -270,10 +278,12 @@ public class LLMGeneratorUIServlet extends SlingAllMethodsServlet {
                "            padding: 40px;\n" +
                "        }\n" +
                "        \n" +
-               "        .preview-iframe {\n" +
+               "        .preview-content {\n" +
                "            width: 100%;\n" +
                "            height: 100%;\n" +
                "            border: none;\n" +
+               "            padding: 20px;\n" +
+               "            overflow-y: auto;\n" +
                "        }\n" +
                "        \n" +
                "        .loading-spinner {\n" +
@@ -313,7 +323,11 @@ public class LLMGeneratorUIServlet extends SlingAllMethodsServlet {
                "    <div class=\"container\">\n" +
                "        <div class=\"header\">\n" +
                "            <h1>🚀 SURGE AEM LLM Component Generator</h1>\n" +
-               "            <p>Generate AEM component files with AI assistance - Enter a prompt and get instant results</p>\n" +
+               "            <p>Generate AEM component files with Local LLM assistance - Enter a prompt and get instant results</p>\n" +
+               "        </div>\n" +
+               "        \n" +
+               "        <div class=\"llm-info\">\n" +
+               "            <strong>🔧 Local LLM Integration:</strong> This tool uses your local LLM (Ollama/LocalAI) to generate AEM components. No external API calls or rate limits!\n" +
                "        </div>\n" +
                "        \n" +
                "        <div class=\"main-content\">\n" +
@@ -322,7 +336,7 @@ public class LLMGeneratorUIServlet extends SlingAllMethodsServlet {
                "                    <label for=\"prompt-input\">Component Prompt</label>\n" +
                "                    <textarea id=\"prompt-input\" \n" +
                "                             class=\"prompt-textarea\"\n" +
-               "                             placeholder=\"Enter your prompt here...&#10;&#10;Examples:&#10;• Create a text component with title and description&#10;• Build a hero banner with image and CTA button&#10;• Make a card component with image, title, and text\"\n" +
+               "                             placeholder=\"Enter your prompt here...&#10;&#10;Examples:&#10;• Create a product card component with image, title, description and CTA button&#10;• Build a hero banner with image and CTA button&#10;• Make a card component with image, title, and text\"\n" +
                "                             rows=\"6\"></textarea>\n" +
                "                </div>\n" +
                "                \n" +
@@ -349,7 +363,7 @@ public class LLMGeneratorUIServlet extends SlingAllMethodsServlet {
                "                        <div>\n" +
                "                            <p>💡 Enter a prompt and click \\\"Generate Component\\\" to see the live preview here</p>\n" +
                "                            <p style=\"margin-top: 10px; font-size: 14px; color: #bdc3c7;\">\n" +
-               "                                Your generated component will appear as an interactive preview\n" +
+               "                                Your generated component will appear as an interactive preview with sample data\n" +
                "                            </p>\n" +
                "                        </div>\n" +
                "                    </div>\n" +
@@ -381,7 +395,7 @@ public class LLMGeneratorUIServlet extends SlingAllMethodsServlet {
                "                \n" +
                "                // Show loading state\n" +
                "                setLoadingState(true);\n" +
-               "                showStatusMessage('🔄 Generating component files... This may take a few moments.', 'info');\n" +
+               "                showStatusMessage('🔄 Generating component files using Local LLM... This may take a few moments.', 'info');\n" +
                "                hideDownloadButton();\n" +
                "                \n" +
                "                // First get CSRF token, then make the request\n" +
@@ -418,8 +432,10 @@ public class LLMGeneratorUIServlet extends SlingAllMethodsServlet {
                "                        // Show download button\n" +
                "                        showDownloadButton();\n" +
                "                        \n" +
-               "                        // Load preview if available\n" +
-               "                        if (data.previewUrl) {\n" +
+               "                        // Load preview HTML from LLM response\n" +
+               "                        if (data.previewHtml) {\n" +
+               "                            loadPreviewHtml(data.previewHtml);\n" +
+               "                        } else if (data.previewUrl) {\n" +
                "                            loadPreview(data.previewUrl);\n" +
                "                        } else {\n" +
                "                            showPreviewPlaceholder('Preview not available for this component.');\n" +
@@ -434,7 +450,7 @@ public class LLMGeneratorUIServlet extends SlingAllMethodsServlet {
                "                    if (error.message && error.message.includes('CSRF')) {\n" +
                "                        showStatusMessage('❌ Error: CSRF token issue. Please refresh the page and try again.', 'error');\n" +
                "                    } else {\n" +
-               "                        showStatusMessage('❌ Error: Failed to generate component. Please check your connection and try again.', 'error');\n" +
+               "                        showStatusMessage('❌ Error: Failed to generate component. Please check your Local LLM connection and try again.', 'error');\n" +
                "                    }\n" +
                "                    showPreviewPlaceholder('Generation failed. Please try again.');\n" +
                "                })\n" +
@@ -483,7 +499,11 @@ public class LLMGeneratorUIServlet extends SlingAllMethodsServlet {
                "            }\n" +
                "            \n" +
                "            function loadPreview(previewUrl) {\n" +
-               "                previewContainer.innerHTML = '<iframe src=\"' + previewUrl + '\" class=\"preview-iframe\" sandbox=\"allow-same-origin allow-scripts\"></iframe>';\n" +
+               "                previewContainer.innerHTML = '<iframe src=\"' + previewUrl + '\" class=\"preview-content\" sandbox=\"allow-same-origin allow-scripts\"></iframe>';\n" +
+               "            }\n" +
+               "            \n" +
+               "            function loadPreviewHtml(htmlContent) {\n" +
+               "                previewContainer.innerHTML = '<div class=\"preview-content\">' + htmlContent + '</div>';\n" +
                "            }\n" +
                "            \n" +
                "            function showPreviewPlaceholder(message) {\n" +

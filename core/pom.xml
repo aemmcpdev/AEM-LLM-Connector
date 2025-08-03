@@ -7,14 +7,14 @@
     <parent>
         <groupId>com.surgesoftware.aem</groupId>
         <artifactId>surge-aem-llm-connector</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>2.0.0-SNAPSHOT</version>
     </parent>
     
     <artifactId>surge-aem-llm-connector.core</artifactId>
     <packaging>bundle</packaging>
     
     <name>SURGE AEM LLM Connector - Core</name>
-    <description>Core OSGi bundle for SURGE AEM LLM Connector containing servlets and services</description>
+    <description>Core OSGi bundle for SURGE AEM LLM Connector containing servlets and services for Local LLM integration</description>
     
     <dependencies>
         <!-- AEM 6.5+ API -->
@@ -86,13 +86,29 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         
-        <!-- JSON Processing - Using built-in AEM JSON -->
+        <!-- JSON Processing - Using Jackson for better LLM response parsing -->
         <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.commons.json</artifactId>
-            <version>2.0.20</version>
-            <scope>provided</scope>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
         </dependency>
+        
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        
+        <!-- HTTP Client for Local LLM API -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+        
+        <!-- Removed OkHttp - using Apache HttpClient instead -->
         
         <!-- Testing -->
         <dependency>
@@ -134,14 +150,20 @@
                             org.apache.sling.api;version="[2.0,3)",
                             org.apache.sling.api.servlets;version="[2.0,3)",
                             org.slf4j;version="[1.5,2)",
-                            org.apache.sling.commons.json;version="[2.0,3)",
+                            com.fasterxml.jackson.core;version="[2.0,3)",
+                            com.fasterxml.jackson.databind;version="[2.0,3)",
+                            com.fasterxml.jackson.annotation;version="[2.0,3)",
+                            org.apache.http;version="[4.0,5)",
                             java.net,
                             java.io,
                             java.util,
                             java.util.zip,
                             java.nio.charset,
+                            java.time,
+                            java.time.format,
                             *;resolution:=optional
                         </Import-Package>
+                        <!-- No need to embed dependencies - using provided libraries -->
                         <_dsannotations>*</_dsannotations>
                         <_metatypeannotations>*</_metatypeannotations>
 

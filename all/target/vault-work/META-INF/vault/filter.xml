@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workspaceFilter version="1.0">
+    <filter root="/apps/surge-aem-llm-connector"/>
+    <filter root="/content/surge-aem-llm-connector"/>
+    <filter root="/etc/packages/SURGE Software Solutions/surge-aem-llm-connector.ui.apps-1.0.0-SNAPSHOT.zip"/>
+    <filter root="/etc/packages/SURGE Software Solutions/surge-aem-llm-connector.ui.content-1.0.0-SNAPSHOT.zip"/>
+</workspaceFilter>

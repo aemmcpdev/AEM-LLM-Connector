@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](#)
-[![Version](https://img.shields.io/badge/Version-1.0.0--SNAPSHOT-orange.svg)](#)
+[![Version](https://img.shields.io/badge/Version-2.0.0--SNAPSHOT-orange.svg)](#)
 
 ---
 
@@ -20,7 +20,7 @@
 
 ## Overview
 
-The **SURGE AEM LLM Connector** is an innovative solution developed by **SURGE Software Solutions Pvt Ltd** that bridges the gap between Adobe Experience Manager (AEM) developers and AI-powered development tools. This connector provides a seamless interface to generate AEM component files using OpenAI's ChatGPT-4 model.
+The **SURGE AEM LLM Connector** is an innovative solution developed by **SURGE Software Solutions Pvt Ltd** that bridges the gap between Adobe Experience Manager (AEM) developers and local AI-powered development tools. This connector provides a seamless interface to generate AEM component files using local LLM models (Ollama/LocalAI).
 
 ---
 
@@ -32,18 +32,19 @@ The **SURGE AEM LLM Connector** is an innovative solution developed by **SURGE S
 
 ## Features
 
-- 🤖 **AI-Powered Component Generation**: Generate AEM components using OpenAI ChatGPT-4
-- 🔧 **Text Component Support**: Initial phase focuses on text component generation
+- 🤖 **Local LLM-Powered Component Generation**: Generate AEM components using local LLM models (Ollama/LocalAI)
+- 🔧 **Self-Hosted & Rate-Limit-Free**: No external API dependencies or usage limits
 - 📦 **Maven Integration**: Standard Maven project structure for easy deployment
 - 🌐 **RESTful API**: Simple URL-based interface for developers
 - 📁 **Multiple Output Formats**: Support for JSON and ZIP file downloads
 - 🏢 **SURGE Branding**: Professional branding throughout the solution
+- 🎯 **Live Preview**: Real-time component preview with sample data
 
 ## Architecture
 
 The connector consists of:
 
-- **Core OSGi Bundle**: Contains servlets and OpenAI integration services
+- **Core OSGi Bundle**: Contains servlets and Local LLM integration services
 - **UI Apps Package**: AEM application content
 - **UI Content Package**: AEM content structure
 - **All Package**: Complete deployment package
@@ -52,10 +53,33 @@ The connector consists of:
 
 ### Prerequisites
 
-- Java 11 or higher
+- Java 17 or higher
 - Apache Maven 3.6+
 - Adobe Experience Manager 6.5+
-- OpenAI API Key
+- Local LLM Setup (Ollama or LocalAI)
+
+### Local LLM Setup
+
+#### Option 1: Ollama (Recommended)
+```bash
+# Install Ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Pull a model (e.g., Llama 3.1)
+ollama pull llama3.1
+
+# Start Ollama service
+ollama serve
+```
+
+#### Option 2: LocalAI
+```bash
+# Install LocalAI
+# Follow instructions at: https://github.com/go-skynet/LocalAI
+
+# Start LocalAI service
+local-ai run
+```
 
 ### Installation
 
@@ -65,9 +89,13 @@ The connector consists of:
    cd surge-aem-llm-connector
    ```
 
-2. **Configure OpenAI API Key**:
-   - Open `core/src/main/java/com/surgesoftware/aem/llm/core/services/impl/OpenAIServiceImpl.java`
-   - Replace `your-openai-api-key-here` with your actual OpenAI API key
+2. **Configure Local LLM**:
+   - Open AEM OSGi Console: `http://localhost:4502/system/console/configMgr`
+   - Find "SURGE AEM LLM Connector - Local LLM Configuration"
+   - Configure your local LLM settings:
+     - **LLM Provider**: `ollama` or `localai`
+     - **LLM API URL**: `http://localhost:11434/api/generate` (Ollama) or `http://localhost:8080/v1/chat/completions` (LocalAI)
+     - **LLM Model**: `llama3.1`, `codellama`, `mistral`, etc.
 
 3. **Build the project**:
    ```bash
@@ -84,30 +112,29 @@ The connector consists of:
 Once deployed, the connector provides a REST endpoint at:
 
 ```
-http://localhost:4502/content/aem-llm/generate
+http://localhost:4502/bin/aem-llm/generate
 ```
 
 #### Parameters
 
-- `type`: Component type (default: "text")
-- `requirements`: Additional requirements or specifications
-- `format`: Output format ("json" or "zip", default: "zip")
+- `prompt`: Component generation prompt (required)
+- `requirements`: Additional requirements or specifications (optional)
 
 #### Examples
 
-1. **Generate a text component (ZIP format)**:
+1. **Generate a product card component**:
    ```
-   http://localhost:4502/content/aem-llm/generate?type=text
-   ```
-
-2. **Generate with requirements (JSON format)**:
-   ```
-   http://localhost:4502/content/aem-llm/generate?type=text&requirements=Add%20rich%20text%20support&format=json
+   http://localhost:4502/bin/aem-llm/generate?prompt=Create a product card component with image, title, description and CTA button
    ```
 
-3. **Generate with custom specifications**:
+2. **Generate with requirements**:
    ```
-   http://localhost:4502/content/aem-llm/generate?type=text&requirements=Include%20character%20count%20and%20validation
+   http://localhost:4502/bin/aem-llm/generate?prompt=Build a hero banner&requirements=Include responsive design and accessibility features
+   ```
+
+3. **Generate via UI**:
+   ```
+   http://localhost:4502/bin/aem-llm/ui
    ```
 
 ## Generated Files
@@ -117,6 +144,7 @@ The connector generates the following files for each component:
 - **dialog.xml**: Component dialog configuration
 - **[component].html**: HTL template file
 - **[component].js**: JavaScript/Use-API logic
+- **[component]Model.java**: Sling Model Java class
 - **.content.xml**: Component metadata
 
 ## Project Structure
@@ -126,8 +154,9 @@ surge-aem-llm-connector/
 ├── core/                           # OSGi bundle with servlets and services
 │   ├── src/main/java/
 │   │   └── com/surgesoftware/aem/llm/core/
-│   │       ├── services/           # OpenAI service interfaces
+│   │       ├── services/           # Local LLM service interfaces
 │   │       │   └── impl/          # Service implementations
+│   │       ├── models/            # Data models
 │   │       └── servlets/          # HTTP servlets
 │   └── pom.xml
 ├── ui.apps/                        # AEM application content
@@ -167,28 +196,30 @@ mvn clean install -DskipTests
 mvn test
 
 # Run specific test class
-mvn test -Dtest=OpenAIServiceImplTest
+mvn test -Dtest=LocalLLMServiceImplTest
 ```
 
 ## Configuration
 
 The connector supports the following configurations:
 
-- **OpenAI API Key**: Set in the service implementation
-- **AEM Server URL**: Configured in Maven profiles
+- **Local LLM Provider**: Ollama, LocalAI, or custom
+- **LLM API URL**: Local endpoint for your LLM service
+- **LLM Model**: Model name (llama3.1, codellama, mistral, etc.)
 - **Component Generation Parameters**: Customizable via service parameters
 
 ## 🚧 Roadmap & Vision
 
-This project is just the beginning. The goal is to empower AEM developers to shift from traditional coding to prompt-driven development, covering up to 80% of project development — all through natural language instructions.
+This project is just the beginning. The goal is to empower AEM developers to shift from traditional coding to prompt-driven development, covering up to 80% of project development — all through natural language instructions using local, self-hosted LLMs.
 
 ### ✅ Current Features (MVP)
 
 - 📦 **Local AEM package installation**
-- 🧠 **Prompt-based component generation using LLM**  
-  _e.g., "Create a banner component"_
-- 🖥️ **Live preview of generated components in the same UI**
+- 🧠 **Prompt-based component generation using Local LLM**  
+  _e.g., "Create a product card component with image, title, description and CTA button"_
+- 🖥️ **Live preview of generated components with sample data**
 - 📁 **Auto-generated backend files + HTL structure**
+- 🔧 **Self-hosted, rate-limit-free LLM integration**
 
 ### 🛣️ Coming Soon
 
@@ -200,27 +231,22 @@ This project is just the beginning. The goal is to empower AEM developers to shi
      - "Change background to gradient blue"
 
 2. **Multi-Model Support**
-   - Choose between OpenAI, Claude, Gemini, or custom LLMs
+   - Choose between different local models (Llama, CodeLlama, Mistral, etc.)
    - Easily switch between models to compare performance and responses
 
-3. **Sign-in Based LLM Access**
-   - Users can sign in with Google/GitHub/email
-   - API key is auto-configured — no manual setup required
-   - Personalized model configuration and usage stats per user
-
-4. **Expand Beyond Components**
+3. **Advanced Component Types**
    - Prompt-based creation for:
      - 🧱 Templates
      - 📄 Content Fragments
      - 🎞️ Experience Fragments
      - 🧩 Page policies and editable templates
-   - The aim is to cover most AEM authoring and development use cases via LLMs
+   - The aim is to cover most AEM authoring and development use cases via local LLMs
 
-5. **Component Library + Save/Reuse**
+4. **Component Library + Save/Reuse**
    - Save components as reusable blueprints
    - Re-invoke previous components and apply changes via new prompts
 
-6. **Real-Time Project Sync (Optional)**
+5. **Real-Time Project Sync (Optional)**
    - Push generated components directly to GitHub via PR
    - Preview sandbox instances for QA testing
 
@@ -228,9 +254,9 @@ This project is just the beginning. The goal is to empower AEM developers to shi
 
 ### 🎯 Vision: Prompt-First AEM Development
 
-Shift from manual AEM development to prompt-first development — allowing architects, designers, and developers to build entire page structures, content models, and components with conversational instructions.
+Shift from manual AEM development to prompt-first development — allowing architects, designers, and developers to build entire page structures, content models, and components with conversational instructions using local, self-hosted LLMs.
 
-This tool aims to be your developer copilot inside AEM — not just generating code, but transforming how AEM projects are built, reviewed, and delivered.
+This tool aims to be your developer copilot inside AEM — not just generating code, but transforming how AEM projects are built, reviewed, and delivered, all while maintaining complete control over your AI infrastructure.
 
 ## Contributing
 
@@ -267,4 +293,4 @@ SURGE Software Solutions Pvt Ltd is a leading technology company specializing in
 
 **© 2025 SURGE Software Solutions Pvt Ltd. All rights reserved.**
 
-*Generated by SURGE AEM LLM Connector - Bridging AEM Development with AI Innovation* 
+*Generated by SURGE AEM LLM Connector - Bridging AEM Development with Local AI Innovation* 
